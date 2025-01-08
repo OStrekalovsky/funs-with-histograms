@@ -41,13 +41,24 @@ var (
 			.050,
 		},
 	}, []string{"type"})
+
+	summary = promauto.NewSummaryVec(prometheus.SummaryOpts{
+		Name: "rt_summary",
+		Objectives: map[float64]float64{
+			0.5:  0.0001,
+			0.99: 0.0001,
+			1:    0.0001,
+		},
+	},
+		[]string{"type"},
+	)
 )
 
 const nSamples = 1000
 
 func main() {
-	const fastMean = 13
-	const slowMean = 15
+	const fastMean = 13 // 20
+	const slowMean = 15 // 40
 	fast, slow := generateDistribution(fastMean), generateDistribution(slowMean)
 
 	visualise(fast, slow)
@@ -66,6 +77,10 @@ func main() {
 			for i := 0; i < nSamples; i++ {
 				preciseHistogram.WithLabelValues("slow").Observe(float64(slow[i]) / 1000.0)
 				preciseHistogram.WithLabelValues("fast").Observe(float64(fast[i]) / 1000.0)
+			}
+			for i := 0; i < nSamples; i++ {
+				summary.WithLabelValues("slow").Observe(float64(slow[i]) / 1000.0)
+				summary.WithLabelValues("fast").Observe(float64(fast[i]) / 1000.0)
 			}
 
 			time.Sleep(1 * time.Second)

@@ -1,4 +1,4 @@
-# Step #1. Make directory grafana_data and grafana.db writable
+# Step №1. Make directory grafana_data and grafana.db writable
 ```
 chmod 777 -R grafana_data
 ```
