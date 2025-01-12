@@ -52,6 +52,12 @@ var (
 	},
 		[]string{"type"},
 	)
+
+	nativeHistogram = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:                        "rt_native_hist",
+		Buckets:                     nil,
+		NativeHistogramBucketFactor: 1.1,
+	}, []string{"type"})
 )
 
 const nSamples = 1000
@@ -81,6 +87,10 @@ func main() {
 			for i := 0; i < nSamples; i++ {
 				summary.WithLabelValues("slow").Observe(float64(slow[i]) / 1000.0)
 				summary.WithLabelValues("fast").Observe(float64(fast[i]) / 1000.0)
+			}
+			for i := 0; i < nSamples; i++ {
+				nativeHistogram.WithLabelValues("slow").Observe(float64(slow[i]) / 1000.0)
+				nativeHistogram.WithLabelValues("fast").Observe(float64(fast[i]) / 1000.0)
 			}
 
 			time.Sleep(1 * time.Second)
